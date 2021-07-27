@@ -10,6 +10,8 @@ import * as deepcopy_ from 'deepcopy'
 import { useAppSelector, useAppDispatch } from './hooks'
 import store from './store'
 import { Provider as ReduxProvider } from 'react-redux'
+// @ts-ignore
+import * as Yup from 'yup'
 // const deepCopy = deepcopy_
 // import styles from './styles.module.css'
 
@@ -22,6 +24,7 @@ interface Rules {
   fieldProps?: any
   dependsOn?: any
   manupilation?: any
+  validationSchema?: any
 }
 
 export interface FormContextData {
@@ -44,6 +47,9 @@ export const useDynamicForms = () => React.useContext(FormContext)
 
 export const Provider = ({ children }: any) => {
   const loadingArray = useAppSelector((state) => state.app.loadingArray)
+  /* const validationSchema = useAppSelector(
+    (state) => state.app.validationSchemaObject
+  ) */
   const dispatch = useAppDispatch()
   // NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
@@ -51,7 +57,7 @@ export const Provider = ({ children }: any) => {
   // const [loadingArray, setLoadingArray] = React.useState<string[]>([])
 
   const setLoading = (name: string, value: boolean) => {
-    dispatch({ type: 'set', payload: { name, value } })
+    dispatch({ type: 'setLoading', payload: { name, value } })
   }
 
   const getLoading = React.useCallback(
@@ -64,7 +70,10 @@ export const Provider = ({ children }: any) => {
     [loadingArray]
   )
 
-  const contextValue: FormContextData = { setLoading, getLoading }
+  const contextValue: FormContextData = {
+    setLoading,
+    getLoading
+  }
 
   return (
     <FormContext.Provider value={contextValue}>{children}</FormContext.Provider>
@@ -88,6 +97,7 @@ export const withDynamicForms = (rules: Rules) => (Component: any) => {
   const WrappedComponent = (props: any) => {
     const { values, setFieldValue /* setFieldValue, setValues */ }: any =
       useFormikContext()
+
     const [, meta] = useField(props.name)
     const [passed, setPassed] = React.useState<any>(undefined)
     /* const [manupilationData, setManupilationData] =
@@ -158,13 +168,16 @@ export const withDynamicForms = (rules: Rules) => (Component: any) => {
     React.useEffect(() => {
       const isPassed = checkPassed()
       if (isPassed) {
+        // Reset value with initialValue
         if (meta.value === undefined && rules?.initialValue !== undefined) {
           setFieldValue(props.name, rules.initialValue)
         }
-        /* setRenderedComponent(
-          <Component fieldProps={checkManupilation()} {...props} />
-        ) */
-        // setManupilationData(checkManupilation() || {})
+        /* if (rules.validationSchema) {
+          dispatch({
+            type: 'addValidationSchema',
+            payload: { rules, name: props.name }
+          })
+        } */
         setPassed(isPassed)
       } else {
         setPassed(undefined)
@@ -184,8 +197,12 @@ export const withDynamicForms = (rules: Rules) => (Component: any) => {
 
     if (passed === undefined) return null
 
-    const d = checkManupilation()
-    return <Component fieldProps={d} {...props} />
+    const fieldProps = {
+      validationSchema: rules.validationSchema || {},
+      ...checkManupilation()
+    }
+
+    return <Component fieldProps={fieldProps} {...props} />
   }
 
   return (props: any) =>

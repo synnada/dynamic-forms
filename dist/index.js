@@ -27,7 +27,8 @@ var useAppDispatch = function useAppDispatch() {
 var useAppSelector = reactRedux.useSelector;
 
 var initialState = {
-  loadingArray: []
+  loadingArray: [],
+  validationSchemaObject: {}
 };
 function appReducer(state, action) {
   if (state === void 0) {
@@ -35,23 +36,24 @@ function appReducer(state, action) {
   }
 
   switch (action.type) {
-    case 'set':
-      var _action$payload = action.payload,
-          name = _action$payload.name,
-          value = _action$payload.value;
+    case 'setLoading':
+      var payload = action.payload;
       var draftTracing = [].concat(state.loadingArray);
-      var fieldFoundIndex = draftTracing.indexOf(name);
+      var fieldFoundIndex = draftTracing.indexOf(payload.name);
       var fieldFound = fieldFoundIndex > -1;
 
-      if (value && !fieldFound) {
-        draftTracing.push(name);
-      } else if (!value && fieldFound) {
+      if (payload.value && !fieldFound) {
+        draftTracing.push(payload.name);
+      } else if (!payload.value && fieldFound) {
         draftTracing.splice(fieldFoundIndex, 1);
       }
 
       return _extends({}, state, {
         loadingArray: draftTracing
       });
+
+    case 'addValidationSchema':
+      return _extends({}, state);
   }
 
   return state;
@@ -84,7 +86,7 @@ var Provider = function Provider(_ref) {
 
   var setLoading = function setLoading(name, value) {
     dispatch({
-      type: 'set',
+      type: 'setLoading',
       payload: {
         name: name,
         value: value
@@ -204,9 +206,13 @@ var withDynamicForms = function withDynamicForms(rules) {
         }
       }, [values]);
       if (passed === undefined) return null;
-      var d = checkManupilation();
+
+      var fieldProps = _extends({
+        validationSchema: rules.validationSchema || {}
+      }, checkManupilation());
+
       return React.createElement(Component, Object.assign({
-        fieldProps: d
+        fieldProps: fieldProps
       }, props));
     };
 

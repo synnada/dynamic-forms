@@ -4,6 +4,7 @@ interface Rules {
     fieldProps?: any;
     dependsOn?: any;
     manupilation?: any;
+    validationSchema?: any;
 }
 export interface FormContextData {
     getLoading: (name?: string | undefined) => boolean;

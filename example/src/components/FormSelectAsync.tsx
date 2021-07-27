@@ -22,6 +22,7 @@ function FormSelectAsync(
     isManupilated,
     defaultOptions,
     setIsLoading: setIsLoadingState,
+    validate,
     ...rest
   }: any /* {
   fieldName: string
@@ -145,10 +146,10 @@ function FormSelectAsync(
   }
 
   return (
-    <Field name={fieldName}>
+    <Field name={fieldName} validate={validate || false}>
       {({
         field, // { name, value, onChange, onBlur }
-        form: { errors }, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
+        // form: { errors }, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
         meta
       }: any) => (
         <>
@@ -164,12 +165,17 @@ function FormSelectAsync(
             onInputChange={(v: React.SetStateAction<string>) => {
               setInputValue(v)
             }}
-            invalid={meta.touched && meta.error}
-            errorMessage={errors[fieldName]}
+            invalid={meta.error}
+            errorMessage={meta.error}
             isLoading={isLoading}
             cacheOptions={false}
             {...rest}
           />
+          {meta.error && (
+            <label style={{ fontSize: '80%', color: '#e55353' }}>
+              {meta.error}
+            </label>
+          )}
         </>
       )}
     </Field>

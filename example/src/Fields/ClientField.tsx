@@ -3,7 +3,8 @@
 import React from 'react'
 import FormSelectAsync from '../components/FormSelectAsync'
 import { useDynamicForms, withDynamicForms } from '@synnada/dynamic-forms'
-// import * as Yup from 'yup';
+import * as Yup from 'yup'
+import { validateSchema } from '../utils'
 
 function delay(delayInms: number) {
   return new Promise((resolve) => {
@@ -35,6 +36,7 @@ function ClientField({ name, fieldProps }: any) {
         cacheOptions={false}
         isDisabled={disabled}
         setIsLoading={setLoading}
+        validate={validateSchema(fieldProps.validationSchema)}
       />
     </>
   )
@@ -98,7 +100,9 @@ const rules = {
 
       return false
     }
-  }
+  },
+  validationSchema: (_value: any) =>
+    Yup.object().required('Müşteri alanı zorunludur')
 }
 
 export default withDynamicForms(rules)(ClientField)
