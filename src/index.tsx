@@ -12,6 +12,9 @@ import store from './store'
 import { Provider as ReduxProvider } from 'react-redux'
 // @ts-ignore
 import * as Yup from 'yup'
+// @ts-ignore
+import SparkMD5 from 'spark-md5'
+import { deepStringify } from './utils'
 // const deepCopy = deepcopy_
 // import styles from './styles.module.css'
 
@@ -147,7 +150,10 @@ export const withDynamicForms = (rules: Rules) => (Component: any) => {
               ...predicateResult
             }
 
-            manupilatedFieldProps.isManupilated = true
+            manupilatedFieldProps.isManupilated = SparkMD5.hash(
+              deepStringify(predicateResult)
+            )
+
             /* manupilatedFieldProps.manupilated = 'no'
 
             if (!deepEqual(previousValues[props.name], values[props.name])) {

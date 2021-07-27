@@ -102,6 +102,20 @@ const rules = {
         }
       }
 
+      if (relationValue?.value === 'E_ARCHIVE') {
+        return {
+          loadOptions: () =>
+            delay(1000).then(() => [
+              {
+                value: 'E_COMMERCIAL_INVOICE',
+                label: 'E Ticari Fatura',
+                selected: true
+              }
+            ]),
+          disabled: true
+        }
+      }
+
       return false
     }
   }

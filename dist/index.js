@@ -1,7 +1,10 @@
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+
 var React = require('react');
 var formik = require('formik');
 var reactRedux = require('react-redux');
 var toolkit = require('@reduxjs/toolkit');
+var SparkMD5 = _interopDefault(require('spark-md5'));
 
 function _extends() {
   _extends = Object.assign || function (target) {
@@ -64,6 +67,63 @@ var store = toolkit.configureStore({
     app: appReducer
   }
 });
+
+var deepStringify = function deepStringify(value) {
+  var stringify = function stringify(data, prefix) {
+    if (prefix === void 0) {
+      prefix = null;
+    }
+
+    function unicode_escape(c) {
+      var s = c.charCodeAt(0).toString(16);
+
+      while (s.length < 4) {
+        s = '0' + s;
+      }
+
+      return "\\u" + s;
+    }
+
+    if (!prefix) prefix = '';
+
+    switch (typeof data) {
+      case 'object':
+        if (data == null) return 'null';
+        var i,
+            pieces = [],
+            before,
+            after;
+        var indent = prefix + '    ';
+
+        if (data instanceof Array) {
+          for (i = 0; i < data.length; i++) {
+            pieces.push(stringify(data[i], indent));
+          }
+
+          before = '[\n';
+          after = ']';
+        } else {
+          for (i in data) {
+            pieces.push(i + ': ' + stringify(data[i], indent));
+          }
+
+          before = '{\n';
+          after = '}';
+        }
+
+        return before + indent + pieces.join(',\n' + indent) + '\n' + prefix + after;
+
+      case 'string':
+        data = data.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t').replace(/[\x00-\x19]/g, unicode_escape);
+        return '"' + data + '"';
+
+      default:
+        return String(data).replace(/\n/g, '\n' + prefix);
+    }
+  };
+
+  return stringify(value);
+};
 
 var formContextDefaultValue = {
   getLoading: function getLoading() {
@@ -178,7 +238,7 @@ var withDynamicForms = function withDynamicForms(rules) {
 
             if (predicateResult) {
               manupilatedFieldProps = _extends({}, manupilatedFieldProps, predicateResult);
-              manupilatedFieldProps.isManupilated = true;
+              manupilatedFieldProps.isManupilated = SparkMD5.hash(deepStringify(predicateResult));
             }
           }
         }
