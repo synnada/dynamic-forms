@@ -186,7 +186,8 @@ var withDynamicForms = function withDynamicForms(rules) {
     var WrappedComponent = function WrappedComponent(props) {
       var _useFormikContext = formik.useFormikContext(),
           values = _useFormikContext.values,
-          setFieldValue = _useFormikContext.setFieldValue;
+          setFieldValue = _useFormikContext.setFieldValue,
+          getFieldMeta = _useFormikContext.getFieldMeta;
 
       var _useField = formik.useField(props.name),
           meta = _useField[1];
@@ -230,7 +231,16 @@ var withDynamicForms = function withDynamicForms(rules) {
           var relationPredicate = rules.manupilation[relationName];
 
           if (relationPredicate) {
-            var relationValue = values[relationName];
+            if (relationName.includes('%')) {
+              var fieldName = props.name;
+              var relationTail = relationName.substr(relationName.indexOf('.'), relationName.length);
+              var fieldBase = fieldName.substr(0, fieldName.lastIndexOf('.'));
+              relationName = "" + fieldBase + relationTail;
+            }
+
+            var _meta = getFieldMeta(relationName);
+
+            var relationValue = _meta.value;
             var predicateResult = relationPredicate({
               values: values,
               relationValue: relationValue

@@ -1,4 +1,5 @@
-/* eslint-disable no-unused-vars */
+// @ts-ignore
+/* eslint-disable */
 // import { useField, useFormikContext } from 'formik'
 import React from 'react'
 import FormSelectAsync from '../components/FormSelectAsync'
@@ -77,7 +78,7 @@ ClientField.rule = {
 const rules = {
   fieldProps: {
     loadOptions: () =>
-      delay(3000).then(() => [
+      delay(1000).then(() => [
         { value: '12211212', label: 'Gümrük' },
         { value: '10', label: 'Kerem' }
       ]),
@@ -91,7 +92,7 @@ const rules = {
       if (relationValue?.value === 'E_ARCHIVE') {
         return {
           loadOptions: () =>
-            delay(3000).then(() => [
+            delay(1000).then(() => [
               { value: '12211212', label: 'Gümrük', selected: true }
             ]),
           disabled: true

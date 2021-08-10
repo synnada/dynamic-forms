@@ -4,20 +4,44 @@ import { useDispatch, useSelector, Provider as Provider$1 } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import SparkMD5 from 'spark-md5';
 
-const useAppDispatch = () => useDispatch();
-const useAppSelector = useSelector;
+function _extends() {
+  _extends = Object.assign || function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
 
-const initialState = {
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
+
+  return _extends.apply(this, arguments);
+}
+
+var useAppDispatch = function useAppDispatch() {
+  return useDispatch();
+};
+var useAppSelector = useSelector;
+
+var initialState = {
   loadingArray: [],
   validationSchemaObject: {}
 };
-function appReducer(state = initialState, action) {
+function appReducer(state, action) {
+  if (state === void 0) {
+    state = initialState;
+  }
+
   switch (action.type) {
     case 'setLoading':
-      const payload = action.payload;
-      const draftTracing = [...state.loadingArray];
-      const fieldFoundIndex = draftTracing.indexOf(payload.name);
-      const fieldFound = fieldFoundIndex > -1;
+      var payload = action.payload;
+      var draftTracing = [].concat(state.loadingArray);
+      var fieldFoundIndex = draftTracing.indexOf(payload.name);
+      var fieldFound = fieldFoundIndex > -1;
 
       if (payload.value && !fieldFound) {
         draftTracing.push(payload.name);
@@ -25,32 +49,37 @@ function appReducer(state = initialState, action) {
         draftTracing.splice(fieldFoundIndex, 1);
       }
 
-      return { ...state,
+      return _extends({}, state, {
         loadingArray: draftTracing
-      };
+      });
 
     case 'addValidationSchema':
-      return { ...state
-      };
+      return _extends({}, state);
   }
 
   return state;
 }
 
-const store = configureStore({
+var store = configureStore({
   reducer: {
     app: appReducer
   }
 });
 
-const deepStringify = value => {
-  const stringify = (data, prefix = null) => {
+var deepStringify = function deepStringify(value) {
+  var stringify = function stringify(data, prefix) {
+    if (prefix === void 0) {
+      prefix = null;
+    }
+
     function unicode_escape(c) {
       var s = c.charCodeAt(0).toString(16);
 
-      while (s.length < 4) s = '0' + s;
+      while (s.length < 4) {
+        s = '0' + s;
+      }
 
-      return '\\u' + s;
+      return "\\u" + s;
     }
 
     if (!prefix) prefix = '';
@@ -65,12 +94,16 @@ const deepStringify = value => {
         var indent = prefix + '    ';
 
         if (data instanceof Array) {
-          for (i = 0; i < data.length; i++) pieces.push(stringify(data[i], indent));
+          for (i = 0; i < data.length; i++) {
+            pieces.push(stringify(data[i], indent));
+          }
 
           before = '[\n';
           after = ']';
         } else {
-          for (i in data) pieces.push(i + ': ' + stringify(data[i], indent));
+          for (i in data) {
+            pieces.push(i + ': ' + stringify(data[i], indent));
+          }
 
           before = '{\n';
           after = '}';
@@ -90,145 +123,173 @@ const deepStringify = value => {
   return stringify(value);
 };
 
-const formContextDefaultValue = {
-  getLoading: () => false,
-  setLoading: () => null
+var formContextDefaultValue = {
+  getLoading: function getLoading() {
+    return false;
+  },
+  setLoading: function setLoading() {
+    return null;
+  }
 };
-const FormContext = createContext(formContextDefaultValue);
-const useDynamicForms = () => useContext(FormContext);
-const Provider = ({
-  children
-}) => {
-  const loadingArray = useAppSelector(state => state.app.loadingArray);
-  const dispatch = useAppDispatch();
+var FormContext = createContext(formContextDefaultValue);
+var useDynamicForms = function useDynamicForms() {
+  return useContext(FormContext);
+};
+var Provider = function Provider(_ref) {
+  var children = _ref.children;
+  var loadingArray = useAppSelector(function (state) {
+    return state.app.loadingArray;
+  });
+  var dispatch = useAppDispatch();
 
-  const setLoading = (name, value) => {
+  var setLoading = function setLoading(name, value) {
     dispatch({
       type: 'setLoading',
       payload: {
-        name,
-        value
+        name: name,
+        value: value
       }
     });
   };
 
-  const getLoading = useCallback(name => {
+  var getLoading = useCallback(function (name) {
     if (!name) {
       return Boolean(loadingArray.length);
     }
 
     return loadingArray[name];
   }, [loadingArray]);
-  const contextValue = {
-    setLoading,
-    getLoading
+  var contextValue = {
+    setLoading: setLoading,
+    getLoading: getLoading
   };
   return createElement(FormContext.Provider, {
     value: contextValue
   }, children);
 };
-const DynamicFormsProvider = props => createElement(Provider$1, {
-  store: store
-}, createElement(Provider, Object.assign({}, props)));
-const withDynamicForms = rules => Component => {
-  const defaultRules = {
-    dependsOn: {},
-    fieldProps: {},
-    manupilation: {}
-  };
-  rules = { ...defaultRules,
-    ...rules
-  };
-
-  const WrappedComponent = props => {
-    const {
-      values,
-      setFieldValue
-    } = useFormikContext();
-    const [, meta] = useField(props.name);
-    const [passed, setPassed] = useState(undefined);
-
-    const checkPassed = () => Object.keys(rules.dependsOn).findIndex(relationName => {
-      const relationValue = values[relationName];
-
-      if (relationValue) {
-        if (!rules.dependsOn[relationName]({
-          values,
-          relationValue
-        })) {
-          return true;
-        }
-      } else {
-        return true;
-      }
-
-      return false;
-    }) === -1;
-
-    const cleanFieldValue = () => {
-      console.log(props.name);
-      setFieldValue(props.name, undefined);
+var DynamicFormsProvider = function DynamicFormsProvider(props) {
+  return createElement(Provider$1, {
+    store: store
+  }, createElement(Provider, Object.assign({}, props)));
+};
+var withDynamicForms = function withDynamicForms(rules) {
+  return function (Component) {
+    var defaultRules = {
+      dependsOn: {},
+      fieldProps: {},
+      manupilation: {}
     };
+    rules = _extends({}, defaultRules, rules);
 
-    const checkManupilation = () => {
-      var _rules;
+    var WrappedComponent = function WrappedComponent(props) {
+      var _useFormikContext = useFormikContext(),
+          values = _useFormikContext.values,
+          setFieldValue = _useFormikContext.setFieldValue,
+          getFieldMeta = _useFormikContext.getFieldMeta;
 
-      let manupilatedFieldProps = ((_rules = rules) === null || _rules === void 0 ? void 0 : _rules.fieldProps) || {};
-      const manupilationKeys = Object.keys(rules.manupilation);
+      var _useField = useField(props.name),
+          meta = _useField[1];
 
-      for (let index = 0; index < manupilationKeys.length; index++) {
-        const relationName = manupilationKeys[index];
-        const relationPredicate = rules.manupilation[relationName];
+      var _React$useState = useState(undefined),
+          passed = _React$useState[0],
+          setPassed = _React$useState[1];
 
-        if (relationPredicate) {
-          const relationValue = values[relationName];
-          const predicateResult = relationPredicate({
-            values,
-            relationValue
-          });
+      var checkPassed = function checkPassed() {
+        return Object.keys(rules.dependsOn).findIndex(function (relationName) {
+          var relationValue = values[relationName];
 
-          if (predicateResult) {
-            manupilatedFieldProps = { ...manupilatedFieldProps,
-              ...predicateResult
-            };
-            manupilatedFieldProps.isManupilated = SparkMD5.hash(deepStringify(predicateResult));
+          if (relationValue) {
+            if (!rules.dependsOn[relationName]({
+              values: values,
+              relationValue: relationValue
+            })) {
+              return true;
+            }
+          } else {
+            return true;
+          }
+
+          return false;
+        }) === -1;
+      };
+
+      var cleanFieldValue = function cleanFieldValue() {
+        console.log(props.name);
+        setFieldValue(props.name, undefined);
+      };
+
+      var checkManupilation = function checkManupilation() {
+        var _rules;
+
+        var manupilatedFieldProps = ((_rules = rules) === null || _rules === void 0 ? void 0 : _rules.fieldProps) || {};
+        var manupilationKeys = Object.keys(rules.manupilation);
+
+        for (var index = 0; index < manupilationKeys.length; index++) {
+          var relationName = manupilationKeys[index];
+          var relationPredicate = rules.manupilation[relationName];
+
+          if (relationPredicate) {
+            if (relationName.includes('%')) {
+              var fieldName = props.name;
+              var relationTail = relationName.substr(relationName.indexOf('.'), relationName.length);
+              var fieldBase = fieldName.substr(0, fieldName.lastIndexOf('.'));
+              relationName = "" + fieldBase + relationTail;
+            }
+
+            var _meta = getFieldMeta(relationName);
+
+            var relationValue = _meta.value;
+            var predicateResult = relationPredicate({
+              values: values,
+              relationValue: relationValue
+            });
+
+            if (predicateResult) {
+              manupilatedFieldProps = _extends({}, manupilatedFieldProps, predicateResult);
+              manupilatedFieldProps.isManupilated = SparkMD5.hash(deepStringify(predicateResult));
+            }
           }
         }
-      }
 
-      return manupilatedFieldProps;
+        return manupilatedFieldProps;
+      };
+
+      useEffect(function () {
+        var isPassed = checkPassed();
+
+        if (isPassed) {
+          var _rules2;
+
+          if (meta.value === undefined && ((_rules2 = rules) === null || _rules2 === void 0 ? void 0 : _rules2.initialValue) !== undefined) {
+            setFieldValue(props.name, rules.initialValue);
+          }
+
+          setPassed(isPassed);
+        } else {
+          setPassed(undefined);
+
+          if (meta.value) {
+            cleanFieldValue();
+          }
+        }
+      }, [values]);
+      if (passed === undefined) return null;
+
+      var fieldProps = _extends({
+        validationSchema: rules.validationSchema || {}
+      }, checkManupilation());
+
+      return createElement(Component, Object.assign({
+        fieldProps: fieldProps
+      }, props));
     };
 
-    useEffect(() => {
-      const isPassed = checkPassed();
-
-      if (isPassed) {
-        var _rules2;
-
-        if (meta.value === undefined && ((_rules2 = rules) === null || _rules2 === void 0 ? void 0 : _rules2.initialValue) !== undefined) {
-          setFieldValue(props.name, rules.initialValue);
-        }
-
-        setPassed(isPassed);
-      } else {
-        setPassed(undefined);
-
-        if (meta.value) {
-          cleanFieldValue();
-        }
-      }
-    }, [values]);
-    if (passed === undefined) return null;
-    const fieldProps = {
-      validationSchema: rules.validationSchema || {},
-      ...checkManupilation()
+    return function (props) {
+      return useMemo(function () {
+        return createElement(WrappedComponent, Object.assign({}, props));
+      }, []);
     };
-    return createElement(Component, Object.assign({
-      fieldProps: fieldProps
-    }, props));
   };
-
-  return props => useMemo(() => createElement(WrappedComponent, Object.assign({}, props)), []);
 };
 
 export { DynamicFormsProvider, FormContext, Provider, formContextDefaultValue, useDynamicForms, withDynamicForms };

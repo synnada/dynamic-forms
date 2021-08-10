@@ -7,15 +7,26 @@ import { useField } from 'formik'
 
 function QuantityField({ fieldProps, ...props }: any) {
   // const { values, set } = useFormikContext()
+  const { calculatedAmount } = fieldProps
   const [field, meta] = useField(props)
+
   return (
     <>
-      <input {...props} {...field} value={field?.value || ''} />
+      <input {...props} {...field} value={calculatedAmount ?? ''} />
       {!!meta.touched && !!meta.error && <div>{meta.error}</div>}
     </>
   )
 }
 
-const rules = {}
+const rules = {
+  fieldProps: {
+    calculatedAmount: -1
+  },
+  manupilation: {
+    [`%.amount`]: ({ relationValue }: any) => ({
+      calculatedAmount: relationValue * 2
+    })
+  }
+}
 
 export default withDynamicForms(rules)(QuantityField)

@@ -98,8 +98,11 @@ export const withDynamicForms = (rules: Rules) => (Component: any) => {
   rules = { ...defaultRules, ...rules }
 
   const WrappedComponent = (props: any) => {
-    const { values, setFieldValue /* setFieldValue, setValues */ }: any =
-      useFormikContext()
+    const {
+      values,
+      setFieldValue,
+      getFieldMeta /* setFieldValue, setValues */
+    }: any = useFormikContext()
 
     const [, meta] = useField(props.name)
     const [passed, setPassed] = React.useState<any>(undefined)
@@ -138,10 +141,22 @@ export const withDynamicForms = (rules: Rules) => (Component: any) => {
       let manupilatedFieldProps = rules?.fieldProps || {}
       const manupilationKeys = Object.keys(rules.manupilation)
       for (let index = 0; index < manupilationKeys.length; index++) {
-        const relationName = manupilationKeys[index]
+        let relationName = manupilationKeys[index]
         const relationPredicate = rules.manupilation[relationName]
         if (relationPredicate) {
-          const relationValue = values[relationName]
+          if (relationName.includes('%')) {
+            // that means the searched value is on the same index
+            let fieldName: string = props.name as string
+            let relationTail: string = relationName.substr(
+              relationName.indexOf('.'),
+              relationName.length
+            )
+            const fieldBase = fieldName.substr(0, fieldName.lastIndexOf('.'))
+            relationName = `${fieldBase}${relationTail}`
+          }
+
+          const _meta = getFieldMeta(relationName)
+          const relationValue = _meta.value
           const predicateResult = relationPredicate({ values, relationValue })
 
           if (predicateResult) {

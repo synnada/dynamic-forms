@@ -35,26 +35,24 @@ function FormSelectAsync(
 } */
 ) {
   const { setFieldValue, getFieldMeta } = useFormikContext()
-  const [options, setOptions] = useState(undefined)
-  const [isLoading, setIsLoading] = useState(false)
-  const [inputValue, setInputValue] = useState('')
-  const [manual, setManual] = useState(false)
+  const [options, setOptions] = useState<any>(undefined)
+  const [isLoading, setIsLoading] = useState<any>(false)
+  const [inputValue, setInputValue] = useState<any>('')
+  const [manual, setManual] = useState<any>(false)
   const [manupilated, setManupilated] = useState<any>(undefined)
 
-  const isSelectedValueSame = (willSelect: { value: null | undefined }) =>
+  const isSelectedValueSame = (willSelect: any) =>
     valueOrNull((getFieldMeta(fieldName) as any)?.value?.value) ===
     valueOrNull(willSelect?.value)
 
-  const fetchOptions = (
-    afterLoad: { (): any; (): any } | undefined = undefined
-  ) => {
+  const fetchOptions = (afterLoad: any = undefined) => {
     if (!isLoading) {
       setIsLoading(true)
       loadOptions(inputValue)
-        .then((response: React.SetStateAction<undefined>) => {
+        .then((response: any) => {
           setOptions(response)
         })
-        .catch((err: { message: any }) => {
+        .catch((err: any) => {
           console.log('error occured: ', err.message)
         })
         .finally(() => {
@@ -71,26 +69,26 @@ function FormSelectAsync(
 
   useEffect(() => {
     if (!options && defaultOptions) {
-      console.log(fieldName, 'defaultOptions called')
+      // console.log(fieldName, 'defaultOptions called');
       fetchWithPageLoading()
     } else if (inputValue) {
-      console.log(fieldName, 'input value called')
+      // console.log(fieldName, 'input value called');
       fetchOptions()
     }
   }, [inputValue])
 
   /* useEffect(() => {
-     if (fieldProps?.manupilated_timestamp) {
-       setManual(false);
-       setIsLoadingState(true);
-       fetchOptions(() => setIsLoadingState(false));
-     } else {
-       if (!options) fetchOptions();
-     }
-   }, [values]); */
+      if (fieldProps?.manupilated_timestamp) {
+        setManual(false);
+        setIsLoadingState(true);
+        fetchOptions(() => setIsLoadingState(false));
+      } else {
+        if (!options) fetchOptions();
+      }
+    }, [values]); */
 
   useEffect(() => {
-    console.log(fieldName, 'manupilated=' /* fieldProps?.manupilated */)
+    // console.log(fieldName, 'manupilated=', isManupilated);
 
     if (isManupilated !== manupilated) {
       if (manupilated && !isManupilated) {
@@ -106,26 +104,24 @@ function FormSelectAsync(
 
   useEffect(() => {
     if (manupilated !== undefined) {
-      if (manupilated === true) {
+      if (manupilated) {
         setManual(false)
         fetchWithPageLoading()
-      } else if (manupilated === false) {
+      } else if (!manupilated) {
         // fetchOptions();
       }
     }
     /* setIsLoadingState(true);
-     fetchOptions(() => setIsLoadingState(false)); */
+      fetchOptions(() => setIsLoadingState(false)); */
   }, [manupilated])
 
   useEffect(() => {
     if (options !== undefined && !inputValue) {
-      const willSelect = (options as any).find(
-        (obj: { selected: any }) => obj?.selected
-      )
+      const willSelect = options.find((obj: any) => obj?.selected)
       if (willSelect) {
         if (!manual && !isSelectedValueSame(willSelect)) {
           setValue(fieldName, willSelect, true)
-          console.log('option seçildi', willSelect)
+          // console.log('option seçildi', willSelect);
         }
       } else if (!manual) {
         setValue(fieldName, null)
@@ -137,10 +133,10 @@ function FormSelectAsync(
     setValue(fieldName, object, true)
     setManual(true)
     // setInputValue('');
-    console.log('formik field güncellendi', object)
+    // console.log('formik field güncellendi', object);
   }
 
-  const setValue = (name: string, value: null, isValidated = false) => {
+  const setValue = (name: any, value: any, isValidated = false) => {
     setFieldValue(name, value, isValidated)
     afterSelect && afterSelect(value)
   }
